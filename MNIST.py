@@ -26,6 +26,7 @@ def init_weights(shape):
 w = init_weights([3, 3, 1, 32])
 w2 = init_weights([3, 3, 32, 64])
 w3 = init_weights([3, 3, 64, 128])
+w4 = init_weights([128 * 4 * 4, 625])
 w_o = init_weights([625, num_classes])
 p_keep_conv = tf.placeholder("float")
 p_keep_hidden = tf.placeholder("float")
@@ -58,3 +59,10 @@ def model(X, w, w2, w3, w4, w_o, p_keep_conv, p_keep_hidden):
     FC_layer = tf.nn.dropout(FC_layer, p_keep_conv)
     output_layer = tf.nn.relu(tf.matmul(FC_layer, w4))
     output_layer = tf.nn.dropout(output_layer, p_keep_hidden)
+
+
+py_x = model(X, w, w2, w3, w4, w_o, p_keep_conv, p_keep_hidden)
+Y_ = tf.nn.softmax_cross_entropy_with_logits_v2(labels=Y, logits=py_x)
+cost = tf.reduce_mean(Y_)
+optimizer = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
+predict_op = tf.argmax(py_x, 1)
